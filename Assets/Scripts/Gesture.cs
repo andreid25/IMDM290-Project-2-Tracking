@@ -28,6 +28,8 @@ public class Gesture : MonoBehaviour
     int totalNumberofLandmark;
     public Transform wristTransform;
     public Transform targetPosition;
+    public GameObject box;
+    public float boxZ;
     private void Awake()
     {
         if (Gesture.gen == null)
@@ -42,17 +44,20 @@ public class Gesture : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+         boxZ = box.transform.position.z;
+
+
         if (drawLandmarks)
         {
             // Initiate pose landmarks as spheres
-            for (int i = 0; i < poseLandmark_number; i++)
-            {
-                PoseLandmarks[i] = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            }
+            // for (int i = 0; i < poseLandmark_number; i++)
+            // {
+            //     PoseLandmarks[i] = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            // }
             // Initiate R+L hands landmarks as spheres
             for (int i = 0; i < handLandmark_number; i++)
             {
-                LeftHandLandmarks[i] = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                //LeftHandLandmarks[i] = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 RightHandLandmarks[i] = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             }
         }
@@ -66,24 +71,24 @@ public class Gesture : MonoBehaviour
         int idx = 0;
         if (drawLandmarks)
         {
-            foreach (GameObject pl in PoseLandmarks)
-            {
-                pl.transform.transform.position = -pose[idx];
-                Color customColor = new Color(idx * 10 / 255, idx * 7 / 255, idx * 3 / 255, 1); // Color of pose landmarks
-                pl.GetComponent<Renderer>().material.SetColor("_Color", customColor);
-                pl.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
-                idx++;
-            }
-            // Assign Left hand landmarks position
-            idx = 0;
-            foreach (GameObject lhl in LeftHandLandmarks)
-            {
-                lhl.transform.transform.position = -lefthandpos[idx];
-                Color customColor = new Color(idx * 4 / 255, idx * 15f / 255, idx * 30f / 255, 1); // Color of left hand landmarks
-                lhl.GetComponent<Renderer>().material.SetColor("_Color", customColor);
-                lhl.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
-                idx++;
-            }
+            // foreach (GameObject pl in PoseLandmarks)
+            // {
+            //     pl.transform.transform.position = -pose[idx];
+            //     Color customColor = new Color(idx * 10 / 255, idx * 7 / 255, idx * 3 / 255, 1); // Color of pose landmarks
+            //     pl.GetComponent<Renderer>().material.SetColor("_Color", customColor);
+            //     pl.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
+            //     idx++;
+            // }
+            // // Assign Left hand landmarks position
+            // idx = 0;
+            // foreach (GameObject lhl in LeftHandLandmarks)
+            // {
+            //     lhl.transform.transform.position = -lefthandpos[idx];
+            //     Color customColor = new Color(idx * 4 / 255, idx * 15f / 255, idx * 30f / 255, 1); // Color of left hand landmarks
+            //     lhl.GetComponent<Renderer>().material.SetColor("_Color", customColor);
+            //     lhl.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
+            //     idx++;
+            // }
             // Assign Right hand landmarks position
             idx = 0;
             foreach (GameObject rhl in RightHandLandmarks)
@@ -97,30 +102,44 @@ public class Gesture : MonoBehaviour
         }
 
 
-        RotateWristTowardsTargetPosition();
+        wristTransform.position = -righthandpos[0];
+
+        RotateWristTowardsTargetPosition(-righthandpos[2],-righthandpos[12],wristTransform.position);
+
+
+        Vector3 tkposition = new Vector3(0, 0, 0);
+        for (int i = 0; i < 20; i++)
+        { 
+            tkposition = tkposition - Gesture.gen.righthandpos[i];
+        }
+        tkposition = tkposition / 20;
+
+        box.transform.position = new Vector3(tkposition.x,tkposition.y,boxZ);
     }
 
-void RotateWristTowardsTargetPosition()
+void RotateWristTowardsTargetPosition(Vector3 thumbBase, Vector3 middleTip, Vector3 wristPos)
 {
-    wristTransform.position = -righthandpos[0];
-    // Calculate the direction vector from the wrist to the target position
-    Vector3 direction = (-righthandpos[12]) - wristTransform.position;
-    direction.Normalize(); // Normalize the direction vector
-
-    // Create a rotation that looks in the direction of the target point, but aligned with the world up
-    Quaternion lookRotation = Quaternion.LookRotation(direction, Vector3.up);
-
-    // Extract Euler angles from the quaternion
-    Vector3 euler = lookRotation.eulerAngles;
-
-    // Zero out the y rotation
-    euler.y = 0; // Or set it to wristTransform.rotation.eulerAngles.y to maintain its original y orientation
-
-    // Create a new quaternion from the modified Euler angles
-    Quaternion targetRotation = Quaternion.Euler(euler) * Quaternion.Euler(90,0,0);
-
+    // Direction from wrist to middleTip defines the local y-axis direction
+    Vector3 yDirection = (middleTip - wristPos).normalized;
+    
+    // Calculate a rough xDirection pointing towards the thumb
+    // First, find a vector pointing from the wrist towards the thumb
+    Vector3 towardsThumb = (thumbBase - wristPos).normalized;
+    
+    // Use the cross product to find a vector perpendicular to yDirection and towardsThumb
+    // This helps ensure that zDirection is orthogonal to the plane defined by yDirection and towardsThumb
+    Vector3 zDirection = Vector3.Cross(yDirection, towardsThumb).normalized;
+    
+    // Recalculate xDirection to ensure it's perfectly orthogonal to yDirection and zDirection
+    // This corrects any deviations due to the initial approximation
+    Vector3 xDirection = Vector3.Cross(zDirection, yDirection).normalized;
+    
+    // Now, use the x, y, and z directions to construct a rotation matrix
+    Quaternion targetRotation = Quaternion.LookRotation(zDirection, yDirection);
+    
     // Apply the calculated rotation to the wrist
     wristTransform.rotation = targetRotation;
 }
+
 
 }

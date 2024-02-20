@@ -26,10 +26,10 @@ public class Gesture : MonoBehaviour
     public bool trigger = false;
     private float distance;
     int totalNumberofLandmark;
-    public Transform wristTransform;
-    public Transform targetPosition;
-    public GameObject box;
-    public float boxZ;
+    public Transform rightWristTransform;
+    public Transform leftWristTransform;
+    public GameObject rBox, lBox;
+    public float rBoxZ, lBoxZ;
     private void Awake()
     {
         if (Gesture.gen == null)
@@ -44,7 +44,8 @@ public class Gesture : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-         boxZ = box.transform.position.z;
+         rBoxZ = rBox.transform.position.z;
+         lBoxZ = lBox.transform.position.z;
 
 
         if (drawLandmarks)
@@ -102,29 +103,40 @@ public class Gesture : MonoBehaviour
         }
 
 
-        wristTransform.position = -righthandpos[0];
+        rightWristTransform.position = -righthandpos[0];
 
-        RotateWristTowardsTargetPosition(-righthandpos[2],-righthandpos[12],wristTransform.position);
+        RotateWristTowardsTargetPosition(-righthandpos[2],-righthandpos[12],rightWristTransform);
+
+        leftWristTransform.position = -lefthandpos[0];
+
+        RotateWristTowardsTargetPosition(-lefthandpos[2],-lefthandpos[12],leftWristTransform);
 
 
-        Vector3 tkposition = new Vector3(0, 0, 0);
+        Vector3 tkRposition = new Vector3(0, 0, 0);
+        Vector3 tkLposition = new Vector3(0, 0, 0);
         for (int i = 0; i < 20; i++)
         { 
-            tkposition = tkposition - Gesture.gen.righthandpos[i];
+            tkRposition = tkRposition - Gesture.gen.righthandpos[i];
+            tkLposition = tkLposition - Gesture.gen.lefthandpos[i];
         }
-        tkposition = tkposition / 20;
+        tkRposition = tkRposition / 20;
+        tkLposition = tkLposition / 20;
 
-        box.transform.position = new Vector3(tkposition.x,tkposition.y,boxZ);
+        rBox.transform.position = new Vector3(tkRposition.x,tkRposition.y,rBoxZ);
+        lBox.transform.position = new Vector3(tkLposition.x,tkLposition.y,lBoxZ);
     }
 
-void RotateWristTowardsTargetPosition(Vector3 thumbBase, Vector3 middleTip, Vector3 wristPos)
+//this function used three points to define a direction the wrist is treated as the parent and
+//the  middletip is positive y and the thumbase is negative x, if you'll need to flip your thumbs X component
+//for the opposite hand
+void RotateWristTowardsTargetPosition(Vector3 thumbBase, Vector3 middleTip, Transform wristTransform)
 {
     // Direction from wrist to middleTip defines the local y-axis direction
-    Vector3 yDirection = (middleTip - wristPos).normalized;
+    Vector3 yDirection = (middleTip - wristTransform.position).normalized;
     
     // Calculate a rough xDirection pointing towards the thumb
     // First, find a vector pointing from the wrist towards the thumb
-    Vector3 towardsThumb = (thumbBase - wristPos).normalized;
+    Vector3 towardsThumb = (thumbBase - wristTransform.position).normalized;
     
     // Use the cross product to find a vector perpendicular to yDirection and towardsThumb
     // This helps ensure that zDirection is orthogonal to the plane defined by yDirection and towardsThumb

@@ -26,6 +26,8 @@ public class Gesture : MonoBehaviour
     public bool trigger = false;
     private float distance;
     int totalNumberofLandmark;
+    public Transform wristTransform;
+    public Transform targetPosition;
     private void Awake()
     {
         if (Gesture.gen == null)
@@ -58,6 +60,7 @@ public class Gesture : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
         // Case 0. Draw holistic shape
         // Assign Pose landmarks position
         int idx = 0;
@@ -92,5 +95,32 @@ public class Gesture : MonoBehaviour
                 idx++;
             }
         }
+
+
+        RotateWristTowardsTargetPosition();
     }
+
+void RotateWristTowardsTargetPosition()
+{
+    wristTransform.position = -righthandpos[0];
+    // Calculate the direction vector from the wrist to the target position
+    Vector3 direction = (-righthandpos[12]) - wristTransform.position;
+    direction.Normalize(); // Normalize the direction vector
+
+    // Create a rotation that looks in the direction of the target point, but aligned with the world up
+    Quaternion lookRotation = Quaternion.LookRotation(direction, Vector3.up);
+
+    // Extract Euler angles from the quaternion
+    Vector3 euler = lookRotation.eulerAngles;
+
+    // Zero out the y rotation
+    euler.y = 0; // Or set it to wristTransform.rotation.eulerAngles.y to maintain its original y orientation
+
+    // Create a new quaternion from the modified Euler angles
+    Quaternion targetRotation = Quaternion.Euler(euler) * Quaternion.Euler(90,0,0);
+
+    // Apply the calculated rotation to the wrist
+    wristTransform.rotation = targetRotation;
+}
+
 }

@@ -24,7 +24,8 @@ public class ToModel : MonoBehaviour
     int totalNumberofLandmark;
     float timer=0;
     Vector3 tkposition;
-
+    public GameObject Box;
+    public float boxZ;
     private void Awake()
     {
         totalNumberofLandmark = poseLandmark_number + handLandmark_number + handLandmark_number;
@@ -39,6 +40,7 @@ public class ToModel : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        boxZ = Box.transform.position.z;
     }
     // Update is called once per frame
     void Update()
@@ -52,18 +54,20 @@ public class ToModel : MonoBehaviour
             tkposition = tkposition - Gesture.gen.righthandpos[i];
         }
         tkposition = tkposition / 20;
-        tkWhole.transform.position = tkposition;
+
+        Box.transform.position = new Vector3(tkposition.x,tkposition.y,boxZ);
+        
 
         // Assign tk's left and right arms and body position.
         // Averaged 2 vectors to get the stable estimation
         // move rabbit using right hands (right: thumb/index/middle) 
-        tkRightArm.transform.position = -(Gesture.gen.righthandpos[4] + Gesture.gen.righthandpos[2] + Gesture.gen.righthandpos[3] + Gesture.gen.righthandpos[1]) / 4;
-        tkLeftArm.transform.position = -(Gesture.gen.righthandpos[12] + Gesture.gen.righthandpos[10] + Gesture.gen.righthandpos[11] + Gesture.gen.righthandpos[9]) / 4;
-        tkBody.transform.position = -(Gesture.gen.righthandpos[8] + Gesture.gen.righthandpos[6] + Gesture.gen.righthandpos[7] + Gesture.gen.righthandpos[5]) / 4;
+        // tkRightArm.transform.position = -(Gesture.gen.righthandpos[4] + Gesture.gen.righthandpos[2] + Gesture.gen.righthandpos[3] + Gesture.gen.righthandpos[1]) / 4;
+        // tkLeftArm.transform.position = -(Gesture.gen.righthandpos[12] + Gesture.gen.righthandpos[10] + Gesture.gen.righthandpos[11] + Gesture.gen.righthandpos[9]) / 4;
+        // tkBody.transform.position = -(Gesture.gen.righthandpos[8] + Gesture.gen.righthandpos[6] + Gesture.gen.righthandpos[7] + Gesture.gen.righthandpos[5]) / 4;
 
 
-        // 2. Update Shuffler's position
-        shuffler.transform.transform.position = new Vector3(-0.5f + 0.5f*Mathf.Sin(timer), -0.76f, -0.3f + 0.3f * Mathf.Cos(timer));
-        timer = timer + 0.01f;
+        // // 2. Update Shuffler's position
+        // shuffler.transform.transform.position = new Vector3(-0.5f + 0.5f*Mathf.Sin(timer), -0.76f, -0.3f + 0.3f * Mathf.Cos(timer));
+        // timer = timer + 0.01f;
     }
 }

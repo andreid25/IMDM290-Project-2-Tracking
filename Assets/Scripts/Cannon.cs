@@ -36,6 +36,7 @@ public class Cannon : MonoBehaviour
         float yTarget = UnityEngine.Random.Range(Camera.main.transform.position.y - .6f, Camera.main.transform.position.y + .6f);
         Vector3 target = new Vector3(xTarget, yTarget, Camera.main.transform.position.z);
         Vector3 start = gameObject.transform.position;
+        Vector3 rotation = new Vector3(UnityEngine.Random.Range(0, 180), UnityEngine.Random.Range(0, 180), UnityEngine.Random.Range(0, 180));
 
         GameObject projectile = Instantiate(projectiles[(int)UnityEngine.Random.Range(0, projectiles.Length)], start, Quaternion.identity);
         float timePassed = 0;
@@ -47,6 +48,7 @@ public class Cannon : MonoBehaviour
             Vector3 interpolatedPosition = Vector3.Lerp(start, target, timePassed/shotLength);
             interpolatedPosition.y += yCurveVal;
             projectile.transform.position = interpolatedPosition;
+            projectile.transform.Rotate(rotation * Time.deltaTime);
             yield return null;
         }
         Destroy(projectile);

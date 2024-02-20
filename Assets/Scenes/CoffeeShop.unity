@@ -473,8 +473,8 @@ MonoBehaviour:
   - {fileID: 100006, guid: 381eb029d06ce4246b00b6361a470447, type: 3}
   - {fileID: 100000, guid: dc74e53f7f0b5495b9e760dd4803accb, type: 3}
   - {fileID: 100000, guid: 1f00f2bf39c2347bc844a6db1cdc4f74, type: 3}
-  shotSpeedMin: 1.2
-  shotSpeedMax: 2
+  shotSpeedMin: 2
+  shotSpeedMax: 2.8
   curve:
     serializedVersion: 2
     m_Curve:
@@ -519,7 +519,7 @@ Transform:
   m_GameObject: {fileID: 52122454}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.971, y: -0.44, z: -1.55}
+  m_LocalPosition: {x: 2.971, y: -0.44, z: 0.88}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

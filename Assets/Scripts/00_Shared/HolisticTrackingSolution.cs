@@ -65,7 +65,7 @@ namespace Mediapipe.Unity.Holistic
             {
                 graphRunner.OnPoseDetectionOutput += OnPoseDetectionOutput;
                 graphRunner.OnFaceLandmarksOutput += OnFaceLandmarksOutput;
-                graphRunner.OnPoseLandmarksOutput += OnPoseLandmarksOutput;
+                // graphRunner.OnPoseLandmarksOutput += OnPoseLandmarksOutput;
                 graphRunner.OnLeftHandLandmarksOutput += OnLeftHandLandmarksOutput;
                 graphRunner.OnRightHandLandmarksOutput += OnRightHandLandmarksOutput;
                 graphRunner.OnPoseWorldLandmarksOutput += OnPoseWorldLandmarksOutput;
@@ -123,19 +123,19 @@ namespace Mediapipe.Unity.Holistic
             _holisticAnnotationController.DrawFaceLandmarkListLater(eventArgs.value);
         }
 
-        private void OnPoseLandmarksOutput(object stream, OutputEventArgs<NormalizedLandmarkList> eventArgs)
-        {
-            _holisticAnnotationController.DrawPoseLandmarkListLater(eventArgs.value);
-            if (eventArgs.value != null)
-            {
-                for (int i = 0; i < 32; i++)
-                {
-                    Gesture.gen.pose[i].x = eventArgs.value.Landmark[i].X;
-                    Gesture.gen.pose[i].y = eventArgs.value.Landmark[i].Y;
-                    Gesture.gen.pose[i].z = eventArgs.value.Landmark[i].Z;
-                }
-            }
-        }
+        // private void OnPoseLandmarksOutput(object stream, OutputEventArgs<NormalizedLandmarkList> eventArgs)
+        // {
+        //     _holisticAnnotationController.DrawPoseLandmarkListLater(eventArgs.value);
+        //     if (eventArgs.value != null)
+        //     {
+        //         for (int i = 0; i < 32; i++)
+        //         {
+        //             Gesture.gen.pose[i].x = eventArgs.value.Landmark[i].X;
+        //             Gesture.gen.pose[i].y = eventArgs.value.Landmark[i].Y;
+        //             Gesture.gen.pose[i].z = eventArgs.value.Landmark[i].Z;
+        //         }
+        //     }
+        // }
 
         private void OnLeftHandLandmarksOutput(object stream, OutputEventArgs<NormalizedLandmarkList> eventArgs)
         {

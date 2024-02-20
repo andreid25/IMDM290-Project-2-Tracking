@@ -14,30 +14,35 @@ using UnityEngine;
 
 public class Gesture : MonoBehaviour
 {
-    static int poseLandmark_number = 32;
     static int handLandmark_number = 20;
     // Declare landmark vectors 
-    public Vector3[] pose = new Vector3[poseLandmark_number];
     public Vector3[] righthandpos = new Vector3[handLandmark_number];
     public Vector3[] lefthandpos = new Vector3[handLandmark_number];
     public GameObject[] PoseLandmarks, LeftHandLandmarks, RightHandLandmarks;
     public static Gesture gen; // singleton
     public bool drawLandmarks = false;
-    public bool trigger = false;
-    private float distance;
-    int totalNumberofLandmark;
+    
+    //positioning hand
     public Transform rightWristTransform;
     public Transform leftWristTransform;
+    //smoothing hand movement
+    public float smoothTime = 0.1f; // Adjust this value to control the smoothing speed
+    private Vector3 rightWristVelocity = Vector3.zero;
+    private Vector3 leftWristVelocity = Vector3.zero;
+    public float rotationSmoothTime = 0.1f; // Adjust this value to control the rotation smoothing speed
+    private Quaternion rightWristRotationVelocity = Quaternion.identity;
+    private Quaternion leftWristRotationVelocity = Quaternion.identity;
+
+    //hitbox
     public GameObject rBox, lBox;
     public float rBoxZ, lBoxZ;
+
     private void Awake()
     {
         if (Gesture.gen == null)
         {
             Gesture.gen = this;
         }
-        totalNumberofLandmark = poseLandmark_number + handLandmark_number + handLandmark_number;
-        PoseLandmarks = new GameObject[poseLandmark_number];
         LeftHandLandmarks = new GameObject[handLandmark_number];
         RightHandLandmarks = new GameObject[handLandmark_number];
     }
@@ -50,11 +55,6 @@ public class Gesture : MonoBehaviour
 
         if (drawLandmarks)
         {
-            // Initiate pose landmarks as spheres
-            // for (int i = 0; i < poseLandmark_number; i++)
-            // {
-            //     PoseLandmarks[i] = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            // }
             // Initiate R+L hands landmarks as spheres
             for (int i = 0; i < handLandmark_number; i++)
             {
@@ -72,24 +72,17 @@ public class Gesture : MonoBehaviour
         int idx = 0;
         if (drawLandmarks)
         {
-            // foreach (GameObject pl in PoseLandmarks)
-            // {
-            //     pl.transform.transform.position = -pose[idx];
-            //     Color customColor = new Color(idx * 10 / 255, idx * 7 / 255, idx * 3 / 255, 1); // Color of pose landmarks
-            //     pl.GetComponent<Renderer>().material.SetColor("_Color", customColor);
-            //     pl.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
-            //     idx++;
-            // }
+
             // // Assign Left hand landmarks position
-            // idx = 0;
-            // foreach (GameObject lhl in LeftHandLandmarks)
-            // {
-            //     lhl.transform.transform.position = -lefthandpos[idx];
-            //     Color customColor = new Color(idx * 4 / 255, idx * 15f / 255, idx * 30f / 255, 1); // Color of left hand landmarks
-            //     lhl.GetComponent<Renderer>().material.SetColor("_Color", customColor);
-            //     lhl.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
-            //     idx++;
-            // }
+            idx = 0;
+            foreach (GameObject lhl in LeftHandLandmarks)
+            {
+                lhl.transform.transform.position = -lefthandpos[idx];
+                Color customColor = new Color(idx * 4 / 255, idx * 15f / 255, idx * 30f / 255, 1); // Color of left hand landmarks
+                lhl.GetComponent<Renderer>().material.SetColor("_Color", customColor);
+                lhl.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
+                idx++;
+            }
             // Assign Right hand landmarks position
             idx = 0;
             foreach (GameObject rhl in RightHandLandmarks)
@@ -103,12 +96,18 @@ public class Gesture : MonoBehaviour
         }
 
 
-        rightWristTransform.position = -righthandpos[0];
+        // Target positions are the negative of the hand positions
+        Vector3 rightTargetPosition = -righthandpos[0];
+        Vector3 leftTargetPosition = -lefthandpos[0];
 
+        // Smoothly move the right wrist to the new position
+        rightWristTransform.position = Vector3.SmoothDamp(rightWristTransform.position, rightTargetPosition, ref rightWristVelocity, smoothTime);
+
+        // Smoothly move the left wrist to the new position
+        leftWristTransform.position = Vector3.SmoothDamp(leftWristTransform.position, leftTargetPosition, ref leftWristVelocity, smoothTime);
+        
+        
         RotateWristTowardsTargetPosition(-righthandpos[2],-righthandpos[12],rightWristTransform);
-
-        leftWristTransform.position = -lefthandpos[0];
-
         RotateWristTowardsTargetPosition(-lefthandpos[2],-lefthandpos[12],leftWristTransform);
 
 
@@ -116,14 +115,15 @@ public class Gesture : MonoBehaviour
         Vector3 tkLposition = new Vector3(0, 0, 0);
         for (int i = 0; i < 20; i++)
         { 
-            tkRposition = tkRposition - Gesture.gen.righthandpos[i];
-            tkLposition = tkLposition - Gesture.gen.lefthandpos[i];
+            tkRposition = tkRposition - righthandpos[i];
+            tkLposition = tkLposition - lefthandpos[i];
         }
         tkRposition = tkRposition / 20;
         tkLposition = tkLposition / 20;
 
         rBox.transform.position = new Vector3(tkRposition.x,tkRposition.y,rBoxZ);
         lBox.transform.position = new Vector3(tkLposition.x,tkLposition.y,lBoxZ);
+        
     }
 
 //this function used three points to define a direction the wrist is treated as the parent and
@@ -149,8 +149,8 @@ void RotateWristTowardsTargetPosition(Vector3 thumbBase, Vector3 middleTip, Tran
     // Now, use the x, y, and z directions to construct a rotation matrix
     Quaternion targetRotation = Quaternion.LookRotation(zDirection, yDirection);
     
-    // Apply the calculated rotation to the wrist
-    wristTransform.rotation = targetRotation;
+    // Smoothly interpolate the wrist's rotation towards the target rotation
+    wristTransform.rotation = Quaternion.Slerp(wristTransform.rotation, targetRotation, Time.deltaTime / rotationSmoothTime);
 }
 
 

@@ -520,6 +520,7 @@ MonoBehaviour:
   timeBetweenShotMax: 1.2
   xRange: 1
   yRange: 0.6
+  scoreUI: {fileID: 1287636698}
 --- !u!4 &52122456
 Transform:
   m_ObjectHideFlags: 0

@@ -8,6 +8,10 @@ public class ProjectileCollisionCheck : MonoBehaviour
     void OnCollisionEnter(Collision col)
     {
         //UnityEngine.Debug.Log("collided");
-        col.gameObject.GetComponent<ProjectileScript>().hit = true;
+        ProjectileScript ps =  col.gameObject.GetComponent<ProjectileScript>();
+       if(ps)
+       {
+         ps.hit = true;
+       }
     }
 }

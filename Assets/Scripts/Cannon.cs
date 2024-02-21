@@ -39,6 +39,8 @@ public class Cannon : MonoBehaviour
         Vector3 rotation = new Vector3(UnityEngine.Random.Range(0, 180), UnityEngine.Random.Range(0, 180), UnityEngine.Random.Range(0, 180));
 
         GameObject projectile = Instantiate(projectiles[(int)UnityEngine.Random.Range(0, projectiles.Length)], start, Quaternion.identity);
+        projectile.AddComponent<ProjectileCollisionCheck>();
+        
         float timePassed = 0;
         float shotLength = UnityEngine.Random.Range(shotSpeedMin, shotSpeedMax);
         while (projectile.transform.position != target)

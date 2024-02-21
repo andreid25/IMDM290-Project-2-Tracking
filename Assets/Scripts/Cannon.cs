@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class Cannon : MonoBehaviour
 {
@@ -14,6 +15,8 @@ public class Cannon : MonoBehaviour
     public float yRange = .6f;
     float shotBreak;
     float timeSinceLastFire = 0;
+    int score = 0;
+    public TMP_Text scoreUI;
     // Start is called before the first frame update
     void Start()
     {
@@ -57,6 +60,8 @@ public class Cannon : MonoBehaviour
         }
         if (projectileScript.hit)
         {
+            score += 1;
+            scoreUI.text = score.ToString();
             start = new Vector3(projectile.transform.position.x, projectile.transform.position.y, projectile.transform.position.z);
             xTarget = UnityEngine.Random.Range(start.x - 2, start.x + 2);
             yTarget = UnityEngine.Random.Range(start.y - 1.2f, start.y + 1.2f);

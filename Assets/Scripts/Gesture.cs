@@ -111,6 +111,7 @@ public class Gesture : MonoBehaviour
         RotateWristTowardsTargetPosition(-lefthandpos[2],-lefthandpos[12],leftWristTransform);
 
 
+        //positioning hand hitbox
         Vector3 tkRposition = new Vector3(0, 0, 0);
         Vector3 tkLposition = new Vector3(0, 0, 0);
         for (int i = 0; i < 20; i++)
@@ -126,30 +127,30 @@ public class Gesture : MonoBehaviour
         
     }
 
-//this function used three points to define a direction the wrist is treated as the parent and
-//the  middletip is positive y and the thumbase is negative x, if you'll need to flip your thumbs X component
-//for the opposite hand
-void RotateWristTowardsTargetPosition(Vector3 thumbBase, Vector3 middleTip, Transform wristTransform)
-{
-    // Direction from wrist to middleTip defines the local y-axis direction
-    Vector3 yDirection = (middleTip - wristTransform.position).normalized;
-    
-    // Calculate a rough xDirection pointing towards the thumb
-    // First, find a vector pointing from the wrist towards the thumb
-    Vector3 towardsThumb = (thumbBase - wristTransform.position).normalized;
+    //this function used three points to define a direction the wrist is treated as the parent and
+    //the  middletip is positive y and the thumbase is negative x, if you'll need to flip your thumbs X component
+    //for the opposite hand
+    void RotateWristTowardsTargetPosition(Vector3 thumbBase, Vector3 middleTip, Transform wristTransform)
+    {
+        // Direction from wrist to middleTip defines the local y-axis direction
+        Vector3 yDirection = (middleTip - wristTransform.position).normalized;
+        
+        // Calculate a rough xDirection pointing towards the thumb
+        // First, find a vector pointing from the wrist towards the thumb
+        Vector3 towardsThumb = (thumbBase - wristTransform.position).normalized;
 
-    
-    // Use the cross product to find a vector perpendicular to yDirection and towardsThumb
-    // This helps ensure that xDirection is orthogonal to the plane defined by yDirection and towardsThumb
-    Vector3 xDirection = Vector3.Cross(yDirection, towardsThumb).normalized;
-    
-    
-    // Now, use the x, y, and z directions to construct a rotation matrix
-    Quaternion targetRotation = Quaternion.LookRotation(xDirection, yDirection);
-    
-    // Smoothly interpolate the wrist's rotation towards the target rotation
-    wristTransform.rotation = Quaternion.Slerp(wristTransform.rotation, targetRotation, Time.deltaTime / rotationSmoothTime);
-}
+        
+        // Use the cross product to find a vector perpendicular to yDirection and towardsThumb
+        // This helps ensure that xDirection is orthogonal to the plane defined by yDirection and towardsThumb
+        Vector3 xDirection = Vector3.Cross(yDirection, towardsThumb).normalized;
+        
+        
+        // Now, use the x, y directions to construct a rotation matrix
+        Quaternion targetRotation = Quaternion.LookRotation(xDirection, yDirection);
+        
+        // Smoothly interpolate the wrist's rotation towards the target rotation
+        wristTransform.rotation = Quaternion.Slerp(wristTransform.rotation, targetRotation, Time.deltaTime / rotationSmoothTime);
+    }
 
 
 }

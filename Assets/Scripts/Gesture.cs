@@ -137,17 +137,15 @@ void RotateWristTowardsTargetPosition(Vector3 thumbBase, Vector3 middleTip, Tran
     // Calculate a rough xDirection pointing towards the thumb
     // First, find a vector pointing from the wrist towards the thumb
     Vector3 towardsThumb = (thumbBase - wristTransform.position).normalized;
+
     
     // Use the cross product to find a vector perpendicular to yDirection and towardsThumb
-    // This helps ensure that zDirection is orthogonal to the plane defined by yDirection and towardsThumb
-    Vector3 zDirection = Vector3.Cross(yDirection, towardsThumb).normalized;
+    // This helps ensure that xDirection is orthogonal to the plane defined by yDirection and towardsThumb
+    Vector3 xDirection = Vector3.Cross(yDirection, towardsThumb).normalized;
     
-    // Recalculate xDirection to ensure it's perfectly orthogonal to yDirection and zDirection
-    // This corrects any deviations due to the initial approximation
-    Vector3 xDirection = Vector3.Cross(zDirection, yDirection).normalized;
     
     // Now, use the x, y, and z directions to construct a rotation matrix
-    Quaternion targetRotation = Quaternion.LookRotation(zDirection, yDirection);
+    Quaternion targetRotation = Quaternion.LookRotation(xDirection, yDirection);
     
     // Smoothly interpolate the wrist's rotation towards the target rotation
     wristTransform.rotation = Quaternion.Slerp(wristTransform.rotation, targetRotation, Time.deltaTime / rotationSmoothTime);
